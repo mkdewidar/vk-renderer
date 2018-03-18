@@ -1,35 +1,82 @@
-#include <iostream>
+#include "main.hpp"
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
+const int WIDTH = 800;
+const int HEIGHT = 600;
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/vec4.hpp>
-#include <glm/mat4x4.hpp>
-
+GLFWwindow* Window;
+VkInstance Instance;
 
 int main() {
+    try {
+        init_window();
+
+        init_vulkan();
+        
+        main_loop();
+
+        cleanup();
+    } catch (const std::runtime_error& error) {
+        std::cerr << error.what() << std::endl;
+
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+
+void init_window() {
     glfwInit();
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Vulkan window", nullptr, nullptr);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    Window = glfwCreateWindow(WIDTH, HEIGHT, "vk-renderer", nullptr, nullptr);
+}
 
-    uint32_t extensionCount = 0;
+void init_vulkan() {
+    VkApplicationInfo appInfo = {};
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = "vk-renderer";
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.pEngineName = "No Engine";
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_1;
 
-    std::cout << extensionCount << " extensions supported" << std::endl;
+    VkInstanceCreateInfo instanceInfo = {};
+    instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    instanceInfo.pApplicationInfo = &appInfo;
 
-    glm::mat4 matrix;
-    glm::vec4 vec;
-    auto test = matrix * vec;
+    uint32_t requiredExtensionCount = 0;
+    const char** extensionNames = glfwGetRequiredInstanceExtensions(&requiredExtensionCount);
+    instanceInfo.enabledExtensionCount = requiredExtensionCount;
+    instanceInfo.ppEnabledExtensionNames = extensionNames;
+    instanceInfo.enabledLayerCount = 0;
 
-    while (!glfwWindowShouldClose(window)) {
+    uint32_t availableExtensionCount = 0;
+    vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, nullptr);
+    std::vector<VkExtensionProperties> availableExtensions(availableExtensionCount);
+    vkEnumerateInstanceExtensionProperties(nullptr, &availableExtensionCount, availableExtensions.data());
+
+    std::cout << "Using these extensions:\n";
+    for (const auto& extension : availableExtensions) {
+        std::cout << extension.extensionName << " v" << extension.specVersion << "\n";
+    }
+    std::cout.flush();
+
+    if (vkCreateInstance(&instanceInfo, nullptr, &Instance) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create Vulkan instance");
+    }
+}
+
+void main_loop() {
+    while(!glfwWindowShouldClose(Window)) {
         glfwPollEvents();
     }
-    
-    glfwDestroyWindow(window);
+}
+
+void cleanup() {
+    vkDestroyInstance(Instance, nullptr);
+
+    glfwDestroyWindow(Window);
 
     glfwTerminate();
-
-    return 0;
 }
