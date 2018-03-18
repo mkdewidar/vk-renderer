@@ -4,10 +4,10 @@ COMPILER = g++
 SOURCES = src/*.cpp
 
 VULKAN_SDK_PATH = /c/VulkanSDK/1.1.70.0
-GLM_PATH = /d/libs/glm-0.9.8.5
-GLFW3_PATH = /d/libs/glfw-3.2.1.bin.WIN64
+GLM_PATH = /c/Libs/glm-0.9.8.5
+GLFW3_PATH = /c/Libs/glfw-3.2.1.bin.WIN64
 
-COMPILER_FLAGS = -std=c++14 -I$(VULKAN_SDK_PATH)/Include -I$(GLFW3_PATH)/include -I$(GLM_PATH)
+COMPILER_FLAGS = -std=c++14 -I$(VULKAN_SDK_PATH)/Include -I$(GLFW3_PATH)/include -I$(GLM_PATH) -Wall
 LINKER_FLAGS = -L$(VULKAN_SDK_PATH)/Lib -L$(GLFW3_PATH)/lib-mingw-w64 -lvulkan-1 -lglfw3 -mwindows
 
 all:
