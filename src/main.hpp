@@ -13,7 +13,12 @@
 void init_window();
 
 void init_vulkan();
+bool check_validation_layers();
+std::vector<const char*> get_required_extensions();
+void setup_debug_callback();
 
 void main_loop();
 
 void cleanup();
+
+#define VK_EXT_DEBUG_REPORT_EXTENSION_NAME "VK_EXT_debug_report"
