@@ -25,6 +25,8 @@ const std::vector<const char*> ValidationLayers = {
 
 void init_vulkan();
 
+void create_instance();
+
 bool check_validation_layers();
 
 std::vector<const char*> get_required_extensions();
