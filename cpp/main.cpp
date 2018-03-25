@@ -44,8 +44,7 @@ void main_loop() {
 }
 
 void cleanup() {
-    destroy_debug_report_callback_EXT(Instance, Callback);
-    vkDestroyInstance(Instance, nullptr);
+    vulkan_cleanup();
 
     glfwDestroyWindow(Window);
 

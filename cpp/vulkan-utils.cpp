@@ -111,6 +111,11 @@ void setup_debug_callback() {
     }
 }
 
+void vulkan_cleanup() {
+    destroy_debug_report_callback_EXT(Instance, Callback);
+    vkDestroyInstance(Instance, nullptr);
+}
+
 VkResult create_debug_report_callback_EXT(VkInstance instance,
     const VkDebugReportCallbackCreateInfoEXT* createInfo,
     VkDebugReportCallbackEXT* callback) {

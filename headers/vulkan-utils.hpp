@@ -33,6 +33,8 @@ std::vector<const char*> get_required_extensions();
 
 void setup_debug_callback();
 
+void vulkan_cleanup();
+
 VkResult create_debug_report_callback_EXT(VkInstance instance,
     const VkDebugReportCallbackCreateInfoEXT* createInfo,
     VkDebugReportCallbackEXT* callback);
