@@ -35,6 +35,8 @@ void init_vulkan() {
     create_instance();
 
     setup_debug_callback();
+
+    pick_physical_device();
 }
 
 void main_loop() {

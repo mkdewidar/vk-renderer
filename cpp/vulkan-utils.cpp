@@ -107,8 +107,64 @@ void setup_debug_callback() {
     createInfo.pfnCallback = debug_callback;
     
     if (create_debug_report_callback_EXT(Instance, &createInfo, &Callback) != VK_SUCCESS) {
-        throw std::runtime_error("failed to set up debug callback");
+        throw std::runtime_error("Failed to set up debug callback");
     }
+}
+
+void pick_physical_device() {
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(Instance, &deviceCount, nullptr);
+
+    if (deviceCount == 0) {
+        throw std::runtime_error("Could not find any devices with Vulkan support");
+    }
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(Instance, &deviceCount, devices.data());
+
+    for (const auto& device : devices) {
+        if (is_device_suitable(device)) {
+            Device = device;
+            break;
+        }
+    }
+
+    VkPhysicalDeviceProperties deviceProps;
+    vkGetPhysicalDeviceProperties(Device, &deviceProps);
+    std::cout << "Using device: " << deviceProps.deviceName << std::endl;
+
+    if (Device == VK_NULL_HANDLE) {
+        throw std::runtime_error(deviceCount + "device(s) found but none meet requirements");
+    }
+}
+bool is_device_suitable(VkPhysicalDevice device) {
+    VkPhysicalDeviceProperties deviceProps;
+    vkGetPhysicalDeviceProperties(device, &deviceProps);
+    std::cout << "Testing suitability of device: " << deviceProps.deviceName << std::endl;
+
+    return get_queue_family_index(device) >= 0;
+}
+
+uint32_t get_queue_family_index(VkPhysicalDevice device) {
+    uint32_t queueIndex = -1;
+
+    uint32_t queueFamiliesAvailable = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamiliesAvailable, nullptr);
+    std::cout << "Number of queue families: " << queueFamiliesAvailable << std::endl;
+
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamiliesAvailable);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamiliesAvailable, queueFamilies.data());
+
+    uint32_t i = 0;
+    for (const auto& queueFamily : queueFamilies) {
+        if ((queueFamily.queueCount > 0) && (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
+            queueIndex = i;
+            break;
+        }
+
+        i++;
+    }
+    
+    return queueIndex;
 }
 
 void vulkan_cleanup() {
