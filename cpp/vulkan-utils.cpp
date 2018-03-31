@@ -29,7 +29,7 @@ void create_instance() {
     instanceInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instanceInfo.pApplicationInfo = &appInfo;
 
-    auto extensions = get_required_extensions();
+    auto extensions = get_required_instance_extensions();
     instanceInfo.enabledExtensionCount = extensions.size();
     instanceInfo.ppEnabledExtensionNames = extensions.data();
     if (EnableValidationLayers) {
@@ -87,13 +87,13 @@ void pick_physical_device() {
 		}
 	}
 
-	VkPhysicalDeviceProperties deviceProps;
-	vkGetPhysicalDeviceProperties(PhysicalDevice, &deviceProps);
-	std::cout << "Using device: " << deviceProps.deviceName << std::endl;
-
 	if (PhysicalDevice == VK_NULL_HANDLE) {
 		throw std::runtime_error(deviceCount + "device(s) found but none meet requirements");
 	}
+
+	VkPhysicalDeviceProperties deviceProps;
+	vkGetPhysicalDeviceProperties(PhysicalDevice, &deviceProps);
+	std::cout << "Using device: " << deviceProps.deviceName << std::endl;
 }
 
 void create_logical_device()
@@ -121,14 +121,15 @@ void create_logical_device()
 	createInfo.pQueueCreateInfos = requiredQueuesCreateInfo.data();
 	createInfo.queueCreateInfoCount = static_cast<uint32_t>(requiredQueuesCreateInfo.size());
 	createInfo.pEnabledFeatures = &deviceFeatures;
-	createInfo.enabledExtensionCount = 0;
+	createInfo.enabledExtensionCount = Extensions.size();
+	createInfo.ppEnabledExtensionNames = Extensions.data();
 
 	if (EnableValidationLayers) {
 		createInfo.enabledLayerCount = static_cast<uint32_t>(ValidationLayers.size());
 		createInfo.ppEnabledLayerNames = ValidationLayers.data();
 	}
 	else {
-		createInfo.enabledExtensionCount = 0;
+		createInfo.enabledLayerCount = 0;
 	}
 
 	if (vkCreateDevice(PhysicalDevice, &createInfo, nullptr, &Device) != VK_SUCCESS) {
@@ -169,7 +170,7 @@ bool check_validation_layers() {
     return true;
 }
 
-std::vector<const char*> get_required_extensions() {
+std::vector<const char*> get_required_instance_extensions() {
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
@@ -182,12 +183,34 @@ std::vector<const char*> get_required_extensions() {
     return extensions;
 }
 
+bool check_device_extension_support(VkPhysicalDevice device)
+{
+	uint32_t extensionCount = 0;
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+	std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+
+	for (auto& requiredExtensionName : Extensions) {
+		std::string_view requiredExtensionNameView = requiredExtensionName;
+
+		bool notFound = std::find_if(availableExtensions.begin(), availableExtensions.end(),
+			[&requiredExtensionNameView](VkExtensionProperties extensionProperty) {
+			return extensionProperty.extensionName == requiredExtensionNameView;
+		}) == availableExtensions.end();
+
+		if (notFound) return false;
+	}
+
+	return true;
+}
+
 bool is_device_suitable(VkPhysicalDevice device) {
     VkPhysicalDeviceProperties deviceProps;
     vkGetPhysicalDeviceProperties(device, &deviceProps);
     std::cout << "Testing suitability of device: " << deviceProps.deviceName << std::endl;
 
-    return get_queue_family_indices(device).is_valid();
+    return get_queue_family_indices(device).is_valid() && check_device_extension_support(device);
 }
 
 QueueFamilyIndices get_queue_family_indices(VkPhysicalDevice device) {
@@ -195,7 +218,7 @@ QueueFamilyIndices get_queue_family_indices(VkPhysicalDevice device) {
 
     uint32_t availableQueueFamiliesCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(device, &availableQueueFamiliesCount, nullptr);
-    std::cout << "Number of queue families: for device: " << availableQueueFamiliesCount << std::endl;
+    std::cout << "Number of queue families for device: " << availableQueueFamiliesCount << std::endl;
 
     std::vector<VkQueueFamilyProperties> availableQueueFamilies(availableQueueFamiliesCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &availableQueueFamiliesCount, availableQueueFamilies.data());

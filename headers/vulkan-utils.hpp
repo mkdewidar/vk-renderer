@@ -3,6 +3,8 @@
 #include <vector>
 #include <set>
 #include <iostream>
+#include <string_view>
+#include <algorithm>
 #include <cstring>
 
 #define GLFW_INCLUDE_VULKAN
@@ -30,6 +32,10 @@ const std::vector<const char*> ValidationLayers = {
     "VK_LAYER_LUNARG_standard_validation"
 };
 
+const std::vector<const char*> Extensions = {
+	VK_KHR_SWAPCHAIN_EXTENSION_NAME
+};
+
 // Creation
 
 void create_instance();
@@ -44,7 +50,9 @@ void create_logical_device();
 
 bool check_validation_layers();
 
-std::vector<const char*> get_required_extensions();
+std::vector<const char*> get_required_instance_extensions();
+
+bool check_device_extension_support(VkPhysicalDevice device);
 
 bool is_device_suitable(VkPhysicalDevice device);
 
