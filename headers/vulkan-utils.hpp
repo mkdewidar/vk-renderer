@@ -18,7 +18,8 @@
 
 static VkInstance Instance;
 static VkDebugReportCallbackEXT Callback;
-static VkPhysicalDevice Device = VK_NULL_HANDLE;
+static VkPhysicalDevice PhysicalDevice = VK_NULL_HANDLE;
+static VkDevice Device = VK_NULL_HANDLE;
 
 const std::vector<const char*> ValidationLayers = {
     "VK_LAYER_LUNARG_standard_validation"
@@ -36,6 +37,8 @@ void pick_physical_device();
 bool is_device_suitable(VkPhysicalDevice device);
 
 uint32_t get_queue_family_index(VkPhysicalDevice device);
+
+void create_logical_device();
 
 void vulkan_cleanup();
 

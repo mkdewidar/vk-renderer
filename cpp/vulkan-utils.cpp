@@ -123,16 +123,16 @@ void pick_physical_device() {
 
     for (const auto& device : devices) {
         if (is_device_suitable(device)) {
-            Device = device;
+            PhysicalDevice = device;
             break;
         }
     }
 
     VkPhysicalDeviceProperties deviceProps;
-    vkGetPhysicalDeviceProperties(Device, &deviceProps);
+    vkGetPhysicalDeviceProperties(PhysicalDevice, &deviceProps);
     std::cout << "Using device: " << deviceProps.deviceName << std::endl;
 
-    if (Device == VK_NULL_HANDLE) {
+    if (PhysicalDevice == VK_NULL_HANDLE) {
         throw std::runtime_error(deviceCount + "device(s) found but none meet requirements");
     }
 }
@@ -167,8 +167,42 @@ uint32_t get_queue_family_index(VkPhysicalDevice device) {
     return queueIndex;
 }
 
+void create_logical_device()
+{
+	uint32_t queueIndex = get_queue_family_index(PhysicalDevice);
+
+	VkDeviceQueueCreateInfo queueCreateInfo = {};
+	queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	queueCreateInfo.queueFamilyIndex = queueIndex;
+	queueCreateInfo.queueCount = 1;
+	float queuePriority = 1.0f;
+	queueCreateInfo.pQueuePriorities = &queuePriority;
+
+	VkPhysicalDeviceFeatures deviceFeatures = {};
+
+	VkDeviceCreateInfo createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+	createInfo.pQueueCreateInfos = &queueCreateInfo;
+	createInfo.queueCreateInfoCount = 1;
+	createInfo.pEnabledFeatures = &deviceFeatures;
+	createInfo.enabledExtensionCount = 0;
+
+	if (EnableValidationLayers) {
+		createInfo.enabledLayerCount = static_cast<uint32_t>(ValidationLayers.size());
+		createInfo.ppEnabledLayerNames = ValidationLayers.data();
+	}
+	else {
+		createInfo.enabledExtensionCount = 0;
+	}
+
+	if (vkCreateDevice(PhysicalDevice, &createInfo, nullptr, &Device) != VK_SUCCESS) {
+		throw std::runtime_error("Could not instantiate logical device");
+	}
+}
+
 void vulkan_cleanup() {
     destroy_debug_report_callback_EXT(Instance, Callback);
+	vkDestroyDevice(Device, nullptr);
     vkDestroyInstance(Instance, nullptr);
 }
 
