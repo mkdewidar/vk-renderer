@@ -36,9 +36,18 @@ void init_vulkan() {
 
     setup_debug_callback();
 
+	create_surface();
+
     pick_physical_device();
 
 	create_logical_device();
+}
+
+void create_surface()
+{
+	if (glfwCreateWindowSurface(Instance, Window, nullptr, &Surface) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create window surface");
+	}
 }
 
 void main_loop() {
@@ -48,7 +57,9 @@ void main_loop() {
 }
 
 void cleanup() {
-    vulkan_cleanup();
+	vulkan_destory_surface(Surface);
+
+	vulkan_cleanup();
 
     glfwDestroyWindow(Window);
 

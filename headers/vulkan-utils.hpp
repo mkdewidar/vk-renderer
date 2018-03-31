@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <set>
 #include <iostream>
 #include <cstring>
 
@@ -16,34 +17,67 @@
 #endif
 
 
-static VkInstance Instance;
-static VkDebugReportCallbackEXT Callback;
-static VkPhysicalDevice PhysicalDevice = VK_NULL_HANDLE;
-static VkDevice Device = VK_NULL_HANDLE;
+extern VkInstance Instance;
+extern VkDebugReportCallbackEXT Callback;
+extern VkPhysicalDevice PhysicalDevice;
+extern VkDevice Device;
+extern VkSurfaceKHR Surface;
+
+extern VkQueue GraphicsQueue;
+extern VkQueue PresentQueue;
 
 const std::vector<const char*> ValidationLayers = {
     "VK_LAYER_LUNARG_standard_validation"
 };
 
+// Creation
+
 void create_instance();
+
+void setup_debug_callback();
+
+void pick_physical_device();
+
+void create_logical_device();
+
+// Queries
 
 bool check_validation_layers();
 
 std::vector<const char*> get_required_extensions();
 
-void setup_debug_callback();
-
-void pick_physical_device();
 bool is_device_suitable(VkPhysicalDevice device);
 
-uint32_t get_queue_family_index(VkPhysicalDevice device);
+struct QueueFamilyIndices {
+	int graphicsFamily = -1;
+	int presentFamily = -1;
 
-void create_logical_device();
+	bool indices_valid() {
+		return (graphicsFamily >= 0) && (presentFamily >= 0);
+	}
+};
+QueueFamilyIndices get_queue_family_indicies(VkPhysicalDevice device);
+
+// Cleanup
+
+void vulkan_destory_surface(VkSurfaceKHR surface);
 
 void vulkan_cleanup();
+
+// Extensions
 
 VkResult create_debug_report_callback_EXT(VkInstance instance,
     const VkDebugReportCallbackCreateInfoEXT* createInfo,
     VkDebugReportCallbackEXT* callback);
+
 void destroy_debug_report_callback_EXT(VkInstance instance, VkDebugReportCallbackEXT callback);
 
+static VKAPI_ATTR VkBool32 VKAPI_CALL debug_callback(
+	VkDebugReportFlagsEXT flags,
+	VkDebugReportObjectTypeEXT objType,
+	uint64_t obj,
+	size_t location,
+	int32_t code,
+	const char* layerPrefix,
+	const char* msg,
+	void* userData);

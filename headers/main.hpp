@@ -13,6 +13,8 @@ void init_window();
 
 void init_vulkan();
 
+void create_surface();
+
 void main_loop();
 
 void cleanup();
