@@ -98,7 +98,7 @@ void pick_physical_device() {
 
 void create_logical_device()
 {
-	auto queueFamilyIndices = get_queue_family_indicies(PhysicalDevice);
+	auto queueFamilyIndices = get_queue_family_indices(PhysicalDevice);
 
 	std::vector<VkDeviceQueueCreateInfo> requiredQueuesCreateInfo;
 	std::set<int> uniqueQueueFamilyIndices = { queueFamilyIndices.graphicsFamily, queueFamilyIndices.presentFamily };
@@ -187,10 +187,10 @@ bool is_device_suitable(VkPhysicalDevice device) {
     vkGetPhysicalDeviceProperties(device, &deviceProps);
     std::cout << "Testing suitability of device: " << deviceProps.deviceName << std::endl;
 
-    return true;
+    return get_queue_family_indices(device).is_valid();
 }
 
-QueueFamilyIndices get_queue_family_indicies(VkPhysicalDevice device) {
+QueueFamilyIndices get_queue_family_indices(VkPhysicalDevice device) {
 	QueueFamilyIndices queueFamilyIndices = {};
 
     uint32_t availableQueueFamiliesCount = 0;
@@ -207,12 +207,12 @@ QueueFamilyIndices get_queue_family_indicies(VkPhysicalDevice device) {
         }
 
 		VkBool32 presentQueueSupported = false;
-		vkGetPhysicalDeviceSurfaceSupportKHR(PhysicalDevice, i, Surface, &presentQueueSupported);
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, Surface, &presentQueueSupported);
 		if (presentQueueSupported) {
 			queueFamilyIndices.presentFamily = i;
 		}
 
-		if (queueFamilyIndices.indices_valid()) break;
+		if (queueFamilyIndices.is_valid()) break;
 
         i++;
     }

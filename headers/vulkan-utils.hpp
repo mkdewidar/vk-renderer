@@ -52,11 +52,11 @@ struct QueueFamilyIndices {
 	int graphicsFamily = -1;
 	int presentFamily = -1;
 
-	bool indices_valid() {
+	bool is_valid() {
 		return (graphicsFamily >= 0) && (presentFamily >= 0);
 	}
 };
-QueueFamilyIndices get_queue_family_indicies(VkPhysicalDevice device);
+QueueFamilyIndices get_queue_family_indices(VkPhysicalDevice device);
 
 // Cleanup
 
