@@ -9,7 +9,7 @@ GLM_PATH = /c/Libs/glm-0.9.8.5
 GLFW3_PATH = /c/Libs/glfw-3.2.1.bin.WIN64
 
 COMPILER_INCLUDES = -I$(INCLUDES) -I$(VULKAN_SDK_PATH)/Include -I$(GLFW3_PATH)/include -I$(GLM_PATH)
-COMPILER_FLAGS = -std=c++14 -Wall
+COMPILER_FLAGS = -std=c++17 -Wall
 LINKER_FLAGS = -L$(VULKAN_SDK_PATH)/Lib -L$(GLFW3_PATH)/lib-mingw-w64 -lvulkan-1 -lglfw3 -mwindows
 
 all:
