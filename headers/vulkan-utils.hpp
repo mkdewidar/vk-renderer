@@ -19,12 +19,14 @@
 #endif
 
 
-extern VkInstance Instance;
 extern VkDebugReportCallbackEXT Callback;
+
+extern VkInstance Instance;
 extern VkPhysicalDevice PhysicalDevice;
 extern VkDevice Device;
 extern VkSurfaceKHR Surface;
 
+extern VkSwapchainKHR SwapChain;
 extern VkQueue GraphicsQueue;
 extern VkQueue PresentQueue;
 
@@ -46,6 +48,8 @@ void pick_physical_device();
 
 void create_logical_device();
 
+void create_swap_chain(const uint32_t width, const uint32_t height);
+
 // Queries
 
 bool check_validation_layers();
@@ -66,9 +70,23 @@ struct QueueFamilyIndices {
 };
 QueueFamilyIndices get_queue_family_indices(VkPhysicalDevice device);
 
+struct SwapChainSupportDetails {
+	VkSurfaceCapabilitiesKHR capabilities;
+	std::vector<VkSurfaceFormatKHR> formats;
+	std::vector<VkPresentModeKHR> presentationModes;
+};
+SwapChainSupportDetails get_swap_chain_support_details(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
+
+VkSurfaceFormatKHR get_best_surface_format(const std::vector<VkSurfaceFormatKHR>& formats);
+
+VkPresentModeKHR get_best_present_mode(const std::vector<VkPresentModeKHR>& presentModes);
+
+VkExtent2D get_best_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities,
+	const uint32_t width, const uint32_t height);
+
 // Cleanup
 
-void vulkan_destory_surface(VkSurfaceKHR surface);
+void vulkan_destroy_surface(VkSurfaceKHR surface);
 
 void vulkan_cleanup();
 

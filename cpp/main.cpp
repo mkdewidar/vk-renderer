@@ -41,6 +41,8 @@ void init_vulkan() {
     pick_physical_device();
 
 	create_logical_device();
+
+	create_swap_chain(WIDTH, HEIGHT);
 }
 
 void create_surface()
@@ -57,7 +59,7 @@ void main_loop() {
 }
 
 void cleanup() {
-	vulkan_destory_surface(Surface);
+	vulkan_destroy_surface(Surface);
 
 	vulkan_cleanup();
 
