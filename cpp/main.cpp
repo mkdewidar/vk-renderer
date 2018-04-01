@@ -61,8 +61,6 @@ void main_loop() {
 }
 
 void cleanup() {
-	vulkan_destroy_surface(Surface);
-
 	vulkan_cleanup();
 
     glfwDestroyWindow(Window);

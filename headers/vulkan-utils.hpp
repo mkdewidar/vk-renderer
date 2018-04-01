@@ -91,8 +91,6 @@ VkExtent2D get_best_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities,
 
 // Cleanup
 
-void vulkan_destroy_surface(VkSurfaceKHR surface);
-
 void vulkan_cleanup();
 
 // Extensions

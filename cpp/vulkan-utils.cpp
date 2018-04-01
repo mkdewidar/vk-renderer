@@ -424,11 +424,6 @@ VkExtent2D get_best_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities,
 	}
 }
 
-void vulkan_destroy_surface(VkSurfaceKHR surface)
-{
-	vkDestroySurfaceKHR(Instance, surface, nullptr);
-}
-
 void vulkan_cleanup() {
     destroy_debug_report_callback_EXT(Instance, Callback);
 
@@ -437,6 +432,8 @@ void vulkan_cleanup() {
 	}
 
 	vkDestroySwapchainKHR(Device, SwapChain, nullptr);
+	vkDestroySurfaceKHR(Instance, Surface, nullptr);
+
 	vkDestroyDevice(Device, nullptr);
     vkDestroyInstance(Instance, nullptr);
 }
