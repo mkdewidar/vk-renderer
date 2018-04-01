@@ -26,9 +26,12 @@ extern VkPhysicalDevice PhysicalDevice;
 extern VkDevice Device;
 extern VkSurfaceKHR Surface;
 
+extern VkSurfaceFormatKHR SurfaceFormat;
+
 extern VkSwapchainKHR SwapChain;
 extern VkQueue GraphicsQueue;
 extern VkQueue PresentQueue;
+extern std::vector<VkImageView> ImageViews;
 
 const std::vector<const char*> ValidationLayers = {
     "VK_LAYER_LUNARG_standard_validation"
@@ -49,6 +52,8 @@ void pick_physical_device();
 void create_logical_device();
 
 void create_swap_chain(const uint32_t width, const uint32_t height);
+
+void create_image_views();
 
 // Queries
 

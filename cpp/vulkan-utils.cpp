@@ -8,9 +8,12 @@ VkPhysicalDevice PhysicalDevice = VK_NULL_HANDLE;
 VkDevice Device = VK_NULL_HANDLE;
 VkSurfaceKHR Surface;
 
+VkSurfaceFormatKHR SurfaceFormat;
+
 VkSwapchainKHR SwapChain = VK_NULL_HANDLE;
 VkQueue GraphicsQueue = VK_NULL_HANDLE;
 VkQueue PresentQueue = VK_NULL_HANDLE;
+std::vector<VkImageView> ImageViews;
 
 // Creation
 
@@ -195,6 +198,44 @@ void create_swap_chain(const uint32_t width, const uint32_t height)
 	}
 
 	std::cout << "Swapchain created successfully" << std::endl;
+	SurfaceFormat = selectedFormat;
+}
+
+void create_image_views()
+{
+	uint32_t imageCount = 0;
+	vkGetSwapchainImagesKHR(Device, SwapChain, &imageCount, nullptr);
+
+	std::vector<VkImage> images(imageCount);
+	vkGetSwapchainImagesKHR(Device, SwapChain, &imageCount, images.data());
+
+	ImageViews.resize(imageCount);
+
+	uint32_t i = 0;
+	for (auto& image : images) {
+		VkImageViewCreateInfo createInfo = {};
+		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		createInfo.image = image;
+		createInfo.format = SurfaceFormat.format;
+		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		createInfo.subresourceRange.baseArrayLayer = 0;
+		createInfo.subresourceRange.baseMipLevel = 0;
+		createInfo.subresourceRange.layerCount = 1;
+		createInfo.subresourceRange.levelCount = 1;
+
+		if (vkCreateImageView(Device, &createInfo, nullptr, &ImageViews[i])) {
+			throw std::runtime_error("Could not create image view");
+		}
+
+		i++;
+	}
+
+	std::cout << "Created " << ImageViews.size() << " image views" << std::endl;
 }
 
 // Queries
@@ -390,6 +431,11 @@ void vulkan_destroy_surface(VkSurfaceKHR surface)
 
 void vulkan_cleanup() {
     destroy_debug_report_callback_EXT(Instance, Callback);
+
+	for (auto imageView : ImageViews) {
+		vkDestroyImageView(Device, imageView, nullptr);
+	}
+
 	vkDestroySwapchainKHR(Device, SwapChain, nullptr);
 	vkDestroyDevice(Device, nullptr);
     vkDestroyInstance(Instance, nullptr);

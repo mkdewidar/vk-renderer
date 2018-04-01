@@ -43,6 +43,8 @@ void init_vulkan() {
 	create_logical_device();
 
 	create_swap_chain(WIDTH, HEIGHT);
+
+	create_image_views();
 }
 
 void create_surface()
