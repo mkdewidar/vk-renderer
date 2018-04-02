@@ -17,9 +17,11 @@ VkQueue PresentQueue = VK_NULL_HANDLE;
 std::vector<VkImageView> ImageViews;
 VkRenderPass RenderPass;
 VkPipeline Pipeline;
-std::vector<VkFramebuffer> Framebuffers;
-
 VkPipelineLayout PipelineLayout;
+
+std::vector<VkFramebuffer> Framebuffers;
+VkCommandPool CommandPool;
+std::vector<VkCommandBuffer> CommandBuffers;
 
 // Creation
 
@@ -454,6 +456,71 @@ void create_framebuffers()
 	std::cout << "Created " << Framebuffers.size() << " framebuffers" << std::endl;
 }
 
+void create_command_pool()
+{
+	auto queueFamilyIndices = get_queue_family_indices(PhysicalDevice);
+
+	VkCommandPoolCreateInfo createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	createInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
+
+	if (vkCreateCommandPool(Device, &createInfo, nullptr, &CommandPool) != VK_SUCCESS) {
+		std::runtime_error("Failed to create graphics command pool");
+	}
+
+	std::cout << "Command pool created" << std::endl;
+}
+
+void create_command_buffers()
+{
+	CommandBuffers.resize(Framebuffers.size());
+
+	VkCommandBufferAllocateInfo bufferAllocateInfo = {};
+	bufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	bufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	bufferAllocateInfo.commandPool = CommandPool;
+	bufferAllocateInfo.commandBufferCount = (uint32_t) CommandBuffers.size();
+
+	if (vkAllocateCommandBuffers(Device, &bufferAllocateInfo, CommandBuffers.data()) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create command buffers");
+	}
+
+	std::cout << "Command buffers created" << std::endl;
+
+	for (size_t i = 0; i < CommandBuffers.size(); i++) {
+		VkCommandBufferBeginInfo bufferBeginInfo = {};
+		bufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		bufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
+
+		vkBeginCommandBuffer(CommandBuffers[i], &bufferBeginInfo);
+
+		VkRenderPassBeginInfo beginRenderPassInfo = {};
+		beginRenderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		beginRenderPassInfo.renderPass = RenderPass;
+		beginRenderPassInfo.framebuffer = Framebuffers[i];
+		beginRenderPassInfo.renderArea.offset = { 0, 0 };
+		beginRenderPassInfo.renderArea.extent = SurfaceExtent;
+		
+		VkClearValue clearValue = { 0.0f, 0.0f, 0.0f, 1.0f};
+		beginRenderPassInfo.clearValueCount = 1;
+		beginRenderPassInfo.pClearValues = &clearValue;
+
+		vkCmdBeginRenderPass(CommandBuffers[i], &beginRenderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		vkCmdBindPipeline(CommandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline);
+
+		vkCmdDraw(CommandBuffers[i], 3, 1, 0, 0);
+
+		vkCmdEndRenderPass(CommandBuffers[i]);
+
+		if (vkEndCommandBuffer(CommandBuffers[i]) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to record command buffers");
+		}
+	}
+
+	std::cout << "Command buffers recorded" << std::endl;
+}
+
 // Queries
 
 bool check_validation_layers() {
@@ -642,6 +709,8 @@ VkExtent2D get_best_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities,
 
 void vulkan_cleanup() {
     destroy_debug_report_callback_EXT(Instance, Callback);
+
+	vkDestroyCommandPool(Device, CommandPool, nullptr);
 
 	for (auto& framebuffer : Framebuffers) {
 		vkDestroyFramebuffer(Device, framebuffer, nullptr);

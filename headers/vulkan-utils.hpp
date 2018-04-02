@@ -37,9 +37,11 @@ extern VkQueue PresentQueue;
 extern std::vector<VkImageView> ImageViews;
 extern VkRenderPass RenderPass;
 extern VkPipeline Pipeline;
-extern std::vector<VkFramebuffer> Framebuffers;
-
 extern VkPipelineLayout PipelineLayout;
+
+extern std::vector<VkFramebuffer> Framebuffers;
+extern VkCommandPool CommandPool;
+extern std::vector<VkCommandBuffer> CommandBuffers;
 
 const std::vector<const char*> ValidationLayers = {
     "VK_LAYER_LUNARG_standard_validation"
@@ -72,6 +74,10 @@ VkShaderModule create_shader_module(const std::vector<char>& shaderByteCode);
 std::vector<char> read_shader_bytecode(const std::string& filename);
 
 void create_framebuffers();
+
+void create_command_pool();
+
+void create_command_buffers();
 
 // Queries
 
