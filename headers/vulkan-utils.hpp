@@ -37,6 +37,7 @@ extern VkQueue PresentQueue;
 extern std::vector<VkImageView> ImageViews;
 extern VkRenderPass RenderPass;
 extern VkPipeline Pipeline;
+extern std::vector<VkFramebuffer> Framebuffers;
 
 extern VkPipelineLayout PipelineLayout;
 
@@ -69,6 +70,8 @@ void create_graphics_pipeline();
 VkShaderModule create_shader_module(const std::vector<char>& shaderByteCode);
 
 std::vector<char> read_shader_bytecode(const std::string& filename);
+
+void create_framebuffers();
 
 // Queries
 

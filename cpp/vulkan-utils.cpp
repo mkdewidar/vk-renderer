@@ -17,6 +17,7 @@ VkQueue PresentQueue = VK_NULL_HANDLE;
 std::vector<VkImageView> ImageViews;
 VkRenderPass RenderPass;
 VkPipeline Pipeline;
+std::vector<VkFramebuffer> Framebuffers;
 
 VkPipelineLayout PipelineLayout;
 
@@ -428,6 +429,31 @@ std::vector<char> read_shader_bytecode(const std::string & filename) {
 	return fileContents;
 }
 
+void create_framebuffers()
+{
+	Framebuffers.resize(ImageViews.size());
+
+	size_t i = 0;
+	for (auto& imageView : ImageViews) {
+		VkFramebufferCreateInfo createInfo = {};
+		createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		createInfo.renderPass = RenderPass;
+		createInfo.attachmentCount = 1;
+		createInfo.pAttachments = &imageView;
+		createInfo.width = SurfaceExtent.width;
+		createInfo.height = SurfaceExtent.height;
+		createInfo.layers = 1;
+
+		if (vkCreateFramebuffer(Device, &createInfo, nullptr, &Framebuffers[i]) != VK_SUCCESS) {
+			throw std::runtime_error("Failed to create framebuffer number " + i);
+		}
+
+		i++;
+	}
+
+	std::cout << "Created " << Framebuffers.size() << " framebuffers" << std::endl;
+}
+
 // Queries
 
 bool check_validation_layers() {
@@ -617,7 +643,11 @@ VkExtent2D get_best_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities,
 void vulkan_cleanup() {
     destroy_debug_report_callback_EXT(Instance, Callback);
 
-	for (auto imageView : ImageViews) {
+	for (auto& framebuffer : Framebuffers) {
+		vkDestroyFramebuffer(Device, framebuffer, nullptr);
+	}
+
+	for (auto& imageView : ImageViews) {
 		vkDestroyImageView(Device, imageView, nullptr);
 	}
 

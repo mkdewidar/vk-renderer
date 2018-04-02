@@ -49,6 +49,8 @@ void init_vulkan() {
 	create_render_pass();
 
 	create_graphics_pipeline();
+
+	create_framebuffers();
 }
 
 void create_surface()
