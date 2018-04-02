@@ -3,6 +3,8 @@
 #include <vector>
 #include <set>
 #include <iostream>
+#include <fstream>
+#include <string>
 #include <string_view>
 #include <algorithm>
 #include <cstring>
@@ -27,11 +29,16 @@ extern VkDevice Device;
 extern VkSurfaceKHR Surface;
 
 extern VkSurfaceFormatKHR SurfaceFormat;
+extern VkExtent2D SurfaceExtent;
 
 extern VkSwapchainKHR SwapChain;
 extern VkQueue GraphicsQueue;
 extern VkQueue PresentQueue;
 extern std::vector<VkImageView> ImageViews;
+extern VkRenderPass RenderPass;
+extern VkPipeline Pipeline;
+
+extern VkPipelineLayout PipelineLayout;
 
 const std::vector<const char*> ValidationLayers = {
     "VK_LAYER_LUNARG_standard_validation"
@@ -54,6 +61,14 @@ void create_logical_device();
 void create_swap_chain(const uint32_t width, const uint32_t height);
 
 void create_image_views();
+
+void create_render_pass();
+
+void create_graphics_pipeline();
+
+VkShaderModule create_shader_module(const std::vector<char>& shaderByteCode);
+
+std::vector<char> read_shader_bytecode(const std::string& filename);
 
 // Queries
 

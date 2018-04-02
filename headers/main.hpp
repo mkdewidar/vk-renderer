@@ -18,4 +18,3 @@ void create_surface();
 void main_loop();
 
 void cleanup();
-

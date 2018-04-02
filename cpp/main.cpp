@@ -45,6 +45,10 @@ void init_vulkan() {
 	create_swap_chain(WIDTH, HEIGHT);
 
 	create_image_views();
+
+	create_render_pass();
+
+	create_graphics_pipeline();
 }
 
 void create_surface()
