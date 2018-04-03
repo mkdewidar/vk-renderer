@@ -55,6 +55,8 @@ void init_vulkan() {
 	create_command_pool();
 
 	create_command_buffers();
+
+	create_semaphores();
 }
 
 void create_surface()
@@ -67,7 +69,41 @@ void create_surface()
 void main_loop() {
     while(!glfwWindowShouldClose(Window)) {
         glfwPollEvents();
+
+		draw_frame();
     }
+
+	vkDeviceWaitIdle(Device);
+}
+
+void draw_frame() {
+	uint32_t imageIndex = 0;
+	vkAcquireNextImageKHR(Device, SwapChain, std::numeric_limits<uint64_t>::max(), ImageAvailableSemaphore,
+		VK_NULL_HANDLE, &imageIndex);
+
+	VkSubmitInfo submitInfo = {};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = &ImageAvailableSemaphore;
+
+	VkPipelineStageFlags waitForStages[] = { VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT };
+	submitInfo.pWaitDstStageMask = waitForStages;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &CommandBuffers[imageIndex];
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = &RenderFinishSemaphore;
+
+	vkQueueSubmit(GraphicsQueue, 1, &submitInfo, NULL);
+
+	VkPresentInfoKHR presentInfo = {};
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = &SwapChain;
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = &RenderFinishSemaphore;
+	presentInfo.pImageIndices = &imageIndex;
+
+	vkQueuePresentKHR(PresentQueue, &presentInfo);
 }
 
 void cleanup() {

@@ -43,6 +43,10 @@ extern std::vector<VkFramebuffer> Framebuffers;
 extern VkCommandPool CommandPool;
 extern std::vector<VkCommandBuffer> CommandBuffers;
 
+extern VkSemaphore ImageAvailableSemaphore;
+extern VkSemaphore RenderFinishSemaphore;
+
+
 const std::vector<const char*> ValidationLayers = {
     "VK_LAYER_LUNARG_standard_validation"
 };
@@ -78,6 +82,8 @@ void create_framebuffers();
 void create_command_pool();
 
 void create_command_buffers();
+
+void create_semaphores();
 
 // Queries
 

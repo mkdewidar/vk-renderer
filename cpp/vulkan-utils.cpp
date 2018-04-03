@@ -23,6 +23,9 @@ std::vector<VkFramebuffer> Framebuffers;
 VkCommandPool CommandPool;
 std::vector<VkCommandBuffer> CommandBuffers;
 
+VkSemaphore ImageAvailableSemaphore;
+VkSemaphore RenderFinishSemaphore;
+
 // Creation
 
 void create_instance() {
@@ -521,6 +524,19 @@ void create_command_buffers()
 	std::cout << "Command buffers recorded" << std::endl;
 }
 
+void create_semaphores()
+{
+	VkSemaphoreCreateInfo semaphoreCreateInfo = {};
+	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	if ((vkCreateSemaphore(Device, &semaphoreCreateInfo, nullptr, &ImageAvailableSemaphore) ||
+		vkCreateSemaphore(Device, &semaphoreCreateInfo, nullptr, &RenderFinishSemaphore)) != VK_SUCCESS) {
+		throw std::runtime_error("Failed to create semaphores");
+	}
+
+	std::cout << "Semaphores created" << std::endl;
+}
+
 // Queries
 
 bool check_validation_layers() {
@@ -709,6 +725,9 @@ VkExtent2D get_best_swap_extent(const VkSurfaceCapabilitiesKHR& capabilities,
 
 void vulkan_cleanup() {
     destroy_debug_report_callback_EXT(Instance, Callback);
+
+	vkDestroySemaphore(Device, ImageAvailableSemaphore, nullptr);
+	vkDestroySemaphore(Device, RenderFinishSemaphore, nullptr);
 
 	vkDestroyCommandPool(Device, CommandPool, nullptr);
 

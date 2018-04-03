@@ -9,8 +9,8 @@ layout(location = 0) out vec3 fragColor;
 
 vec2 triangleVerts[3] = vec2[] (
 	vec2(0.0, -0.5),
-	vec2(0.5, -0.5),
-	vec2(-0.5, 0)
+	vec2(0.5, 0.5),
+	vec2(-0.5, 0.5)
 );
 
 vec3 triangleColors[3] = vec3[] (

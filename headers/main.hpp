@@ -17,4 +17,6 @@ void create_surface();
 
 void main_loop();
 
+void draw_frame();
+
 void cleanup();
